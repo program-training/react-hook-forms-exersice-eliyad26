@@ -1,65 +1,75 @@
-import  { useState, ChangeEvent, FormEvent } from 'react';
-
+import { useState, ChangeEvent, FormEvent } from "react";
+import { useForm } from "react-hook-form";
+import "./RegularForm.css";
 interface FormData {
   username: string;
   email: string;
-  password:string;
+  password: string;
 }
 
 function RegularForm() {
-  const [formData, setFormData] = useState<FormData>({
-    username: '',
-    email: '',
-    password: '',
-  });
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors },
+  } = useForm({ defaultValues: { userName: "", email: "", password: "" } });
+  const onSubmit = (data: string) => console.log(data);
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
-  };
-
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    alert(JSON.stringify(formData));
-  };
+  // console.log(watch("example")); // watch input value by passing the name of it
 
   return (
-    <form onSubmit={handleSubmit}>
-        <h1>Change Me To React Hook Form</h1>
-      <div>
-        <input
-          type="text"
-          id="username"
-          name="username"
-          placeholder='Enter UserName'
-          value={formData.username}
-          onChange={handleChange}
-        />
-      </div>
-      <div>
-        <input
-          type="text"
-          id="email"
-          name="email"
-          placeholder='Enter Email'
-          value={formData.email}
-          onChange={handleChange}
-        />
-      </div>
-      <div>
-        <input
-          type="text"
-          id="password"
-          name="password"
-          placeholder='Enter Password'
-          value={formData.password}
-          onChange={handleChange}
-        />
-      </div>
-      <button type="submit">Submit</button>
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <h1>Change Me To React Hook Form</h1>
+      <label>UserName : </label>
+      <input
+        {...register("userName", {
+          required: true,
+          minLength: { value: 2, message: "jjjj" },
+        })}
+        aria-invalid={errors.userName ? "true" : "false"}
+      />
+      {errors.userName?.type === "required" && (
+        <p role="alert">userName is required</p>
+      )}
+      {errors.userName?.type === "minLength" && (
+        <p role="alert">needs more then one letter</p>
+      )}
+      <br />
+
+      <label>Email : </label>
+      <input
+        {...register("email", {
+          required: "this is required field",
+          pattern: {
+            value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/i,
+            message: "needs to be else",
+          },
+        })}
+      />
+      {errors.email?.message}
+      <br />
+
+      <label>Password : </label>
+      <input
+        {...register("password", {
+          required: "this is required field",
+          pattern: {
+            value:
+              /^(?=.*[0-9])(?=.*[A-Z])(?=.*[a-z])(?=.*[@#$%^&+=!]).{8,20}$/i,
+            message: "not good password",
+          },
+        })}
+      />
+      {errors.password?.message}
+      <br />
+
+      <select {...register("gender")}>
+        <option value="female">female</option>
+        <option value="male">male</option>
+        <option value="other">other</option>
+      </select>
+      <input type="submit" />
     </form>
   );
 }
